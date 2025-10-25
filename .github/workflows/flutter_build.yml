@@ -9,7 +9,6 @@ on:
       - main
 
 jobs:
-  # Android build job
   build-android:
     runs-on: ubuntu-latest
     steps:
@@ -25,8 +24,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run tests
-        run: flutter test
+      - name: Run tests if they exist
+        run: |
+          if [ -d "test" ]; then
+            flutter test
+          else
+            echo "No tests found, skipping test step"
+          fi
 
       - name: Analyze project
         run: flutter analyze
@@ -44,7 +48,6 @@ jobs:
           if-no-files-found: error
           retention-days: 7
 
-  # iOS build job
   build-ios:
     runs-on: macos-latest
     steps:
@@ -60,8 +63,13 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Run tests
-        run: flutter test
+      - name: Run tests if they exist
+        run: |
+          if [ -d "test" ]; then
+            flutter test
+          else
+            echo "No tests found, skipping test step"
+          fi
 
       - name: Build iOS
         run: |
