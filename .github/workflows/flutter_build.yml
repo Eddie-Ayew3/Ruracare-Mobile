@@ -4,6 +4,9 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   # Android build job
@@ -17,21 +20,29 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.35.7'
+          channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
+
+      - name: Run tests
+        run: flutter test
 
       - name: Analyze project
         run: flutter analyze
 
       - name: Build Android AppBundle
-        run: flutter build appbundle --release
+        run: |
+          flutter build appbundle --release
+          ls -la build/app/outputs/bundle/release/
 
       - name: Upload Android Artifact
         uses: actions/upload-artifact@v4
         with:
           name: android-release
           path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 7
 
   # iOS build job
   build-ios:
@@ -43,16 +54,24 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.0'
+          flutter-version: '3.35.7'
+          channel: 'stable'
 
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Run tests
+        run: flutter test
+
       - name: Build iOS
-        run: flutter build ipa --release
+        run: |
+          flutter build ipa --release --no-codesign
+          ls -la build/ios/ipa/
 
       - name: Upload iOS Artifact
         uses: actions/upload-artifact@v4
         with:
           name: ios-release
           path: build/ios/ipa/*.ipa
+          if-no-files-found: error
+          retention-days: 7
